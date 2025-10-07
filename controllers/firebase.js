@@ -76,13 +76,28 @@ exports.deleteItem = async (req, res) => {
   }
 };
 
-// exports.getdata = async (req, res) => {
-//   const userId = req.params.id;
-//   try {
-//     const userData = await userdata(userId);
-//     res.json(userData);
-//   } catch (error) {
-//     res.status(500).send(error.message);
-//   }
-// };
+exports.addBalance = async (req, res) => {
+  const { number, amount, adminPassword } = req.body;
+
+  try {
+    const adminNumber = ""; // replace with admin number
+    const isAdmin = await Auth(adminNumber, adminPassword);
+
+    if (isAdmin !== 1) {
+      return res.status(401).send("Unauthorized: Admin credentials invalid");
+    }
+
+    // ✅ Proceed to update balance
+    const kart = new Kart(number);
+    const currentBalance = await kart.getBalance();
+    const newBalance = currentBalance + Number(amount);
+
+    await kart.updateBalance(newBalance); // assuming Kart has updateBalance()
+    res.status(200).send(`Balance updated successfully. New balance: ${newBalance}`);
+  } catch (error) {
+    console.error("Error updating balance:", error);
+    res.status(500).send("Error updating balance");
+  }
+};
+
 

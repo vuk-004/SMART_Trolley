@@ -104,6 +104,22 @@ class Kart {
         throw new Error('Error fetching transactions: ' + error.message);
     }
 }
+
+    async addBalance(amount) {
+        const userDoc = balanceRef.doc(this.number);
+        const snapshot = await userDoc.get();
+
+        if (!snapshot.exists) {
+            throw new Error("User not found");
+        }
+
+        const currentBalance = snapshot.data().balance || 0;
+        const newBalance = currentBalance + Number(amount);
+
+        await userDoc.update({ balance: newBalance });
+        return newBalance;
+    }
+
 }
 
 module.exports = Kart;

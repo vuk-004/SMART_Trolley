@@ -1,12 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/firebase');
+const oldController = require('../controllers/firebase'); 
+const bffController = require('../controllers/backendForFrontend'); 
 
-router.post('/additem',userController.addNewItem);
-router.post('/authorize',userController.authenticate);
-router.post('/getItems',userController.getItems);
-router.post('/checkout',userController.checkout);
-router.post('/getBalance',userController.getBalance);
-router.post('/deleteItem',userController.deleteItem);
+router.post('/additem', oldController.addNewItem);
+router.post('/authorize', oldController.authenticate);
+router.post('/getItems', oldController.getItems);
+router.post('/checkout', oldController.checkout);
+router.post('/getBalance', oldController.getBalance);
+router.post('/deleteItem', oldController.deleteItem);
 
-module.exports = router
+
+router.post('/frontend/register', bffController.register);
+router.post('/frontend/login', bffController.login);
+router.post('/frontend/logout', bffController.logout);
+router.post('/frontend/change-username', bffController.changeUsername);
+router.post('/frontend/change-password', bffController.changePassword);
+
+
+router.get('/frontend/cart', bffController.requireAuth, bffController.getCart);
+router.get('/frontend/transactions', bffController.requireAuth, bffController.getTransactions);
+router.get('/frontend/user', bffController.requireAuth, bffController.getUserData);
+
+module.exports = router;

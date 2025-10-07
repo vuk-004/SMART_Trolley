@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const Kart = require('../models/shoppingKart');
 const Auth = require('../models/authenticate'); 
 const Chout = require('../models/checkout');
@@ -78,26 +79,78 @@ exports.deleteItem = async (req, res) => {
 
 exports.addBalance = async (req, res) => {
   const { number, amount, adminPassword } = req.body;
-
   try {
-    const adminNumber = ""; // replace with admin number
+    const adminNumber = ""; 
     const isAdmin = await Auth(adminNumber, adminPassword);
 
     if (isAdmin !== 1) {
       return res.status(401).send("Unauthorized: Admin credentials invalid");
     }
-
-    // ✅ Proceed to update balance
     const kart = new Kart(number);
     const currentBalance = await kart.getBalance();
     const newBalance = currentBalance + Number(amount);
 
-    await kart.updateBalance(newBalance); // assuming Kart has updateBalance()
+    await kart.updateBalance(newBalance); 
     res.status(200).send(`Balance updated successfully. New balance: ${newBalance}`);
   } catch (error) {
     console.error("Error updating balance:", error);
     res.status(500).send("Error updating balance");
   }
 };
+
+
+exports.registerUser = async (req, res) => {
+  const { email, username, number, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10); // hash password
+    const kart = new Kart(number);
+    const initialBalance = 1000; // default starting balance
+    await kart.registerUser(email, username, hashedPassword, initialBalance);
+    res.status(200).send("User registered successfully");
+  } catch (error) {
+    console.error("Error registering user:", error);
+    res.status(500).send("Error registering user");
+  }
+};
+
+exports.changeUsername = async (req, res) => {
+  const { number, password, newUsername } = req.body;
+
+  try {
+    const isAuthenticated = await Auth(number, password);
+    if (isAuthenticated !== 1) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const kart = new Kart(number);
+    await kart.updateUsername(newUsername);
+    res.status(200).send("Username updated successfully");
+  } catch (error) {
+    console.error("Error updating username:", error);
+    res.status(500).send("Error updating username");
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  const { number, oldPassword, newPassword } = req.body;
+
+  try {
+    const isAuthenticated = await Auth(number, oldPassword);
+    if (isAuthenticated !== 1) {
+      return res.status(401).send("Invalid current password");
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10); // hash new password
+    const kart = new Kart(number);
+    await kart.updatePassword(hashedNewPassword);
+
+    res.status(200).send("Password updated successfully");
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).send("Error updating password");
+  }
+};
+
 
 

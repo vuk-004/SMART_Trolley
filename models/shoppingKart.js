@@ -120,6 +120,28 @@ class Kart {
         return newBalance;
     }
 
+
+    async updateUsername(newUsername) {
+    const userDoc = balanceRef.doc(this.number);
+    const snapshot = await userDoc.get();
+    if (!snapshot.exists) {
+        throw new Error("User not found");
+    }
+    await userDoc.update({ username: newUsername });
+    return true;
+}
+
+async updatePassword(hashedPassword) {
+    const userDoc = balanceRef.doc(this.number);
+    const snapshot = await userDoc.get();
+    if (!snapshot.exists) {
+        throw new Error("User not found");
+    }
+    await userDoc.update({ password: hashedPassword });
+    return true;
+}
+
+
 }
 
 module.exports = Kart;

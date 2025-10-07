@@ -1,20 +1,16 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const userRoutes = require('./routes/router');
 const app = express();
-const port = 3000;
+const path = require('path');
 
-app.use(bodyParser.json());
 app.use(express.json());
-app.use('/api',userRoutes);
+app.use(express.static(path.join(__dirname, 'public')));
 
+const userRoutes = require('./routes/userRoutes');
+app.use('/api', userRoutes);
 
-app.post('/data', (req, res) => {
-  console.log('Received data:', req.body);
-  res.send('Data received');
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
